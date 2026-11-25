@@ -63,6 +63,31 @@ keymap 的 RAISE 层（左手第 1 枚拇指键）和 ADJUST 层（左手第 3 �
 > ⚠️ **刷反了整把键盘会完全没有输入**（central 与 peripheral 配不上）。
 > 记住：**插 USB 的那一半 = 左手 = 刷 `sofle_left*`**。
 
+## Keymap
+
+以下键位图由 [keymap-drawer](https://github.com/caksoylar/keymap-drawer) 根据
+[`config/sofle.keymap`](config/sofle.keymap) 与 [`config/sofle.json`](config/sofle.json)
+自动生成，并由 [`.github/workflows/keymap_drawer.yml`](.github/workflows/keymap_drawer.yml)
+在修改键位后自动更新。
+
+**DEFAULT（默认层）**
+
+![DEFAULT 默认层](keymap-drawer/layers/default.svg)
+
+**LOWER（数字 / 符号层）**
+
+![LOWER 数字与符号层](keymap-drawer/layers/lower.svg)
+
+**RAISE（蓝牙 / 导航 / 编辑层）**
+
+![RAISE 蓝牙与导航层](keymap-drawer/layers/raise.svg)
+
+**ADJUST（媒体 / 系统层）**
+
+![ADJUST 媒体与系统层](keymap-drawer/layers/adjust.svg)
+
+完整图（含全部 4 层）：[`keymap-drawer/sofle.svg`](keymap-drawer/sofle.svg)
+
 ## 图层设计
 
 | 层 | 进入方式 | 内容 |
@@ -291,6 +316,16 @@ snippets/
   sofle-oled/            OLED 显示
   sofle-no-display/      禁用板载 OLED，回收 flash
 zephyr/module.yml        告诉 west 在哪里找 boards / snippets
+keymap-drawer/
+  sofle.yaml             keymap-drawer 解析出的中间键位数据
+  sofle.svg              完整 4 层键位总图
+  layers/                按层拆分的独立 SVG（供 README 嵌入展示）
+tools/
+  split_keymap_svg.py    将 sofle.svg 按层拆分为 keymap-drawer/layers/*.svg
+keymap_drawer.config.yaml keymap-drawer 样式与键名映射配置
+.github/workflows/
+  build.yml              编译 OLED / nice!view / settings_reset 固件
+  keymap_drawer.yml      键位变更后自动重绘并拆分 keymap SVG
 build.yaml               构建矩阵（同时构建 OLED 与 nice!view 两套变体）
 ```
 
