@@ -1,10 +1,10 @@
-# zmk-config-soflewireless
+# zmk-config-sofle
 
 [English](./README.en.md) · **简体中文**
 
-> 本分支（`main`）= **板载 SSD1306 OLED / nice!view + DYA Studio**。使用 ZMK main + Zephyr 4.1
+> **板载 SSD1306 OLED / nice!view + DYA Studio**。使用 ZMK main + Zephyr 4.1
 > 的 cormoran fork（`main+dya`），每半一枚 EC11 编码器的映射可在 DYA Studio 里按层修改。
-> 一次构建同时输出板载 OLED 与 nice!view 两套固件。
+> 原 `niceview` 分支已合并至 `main`，一次构建同时输出板载 OLED 与 nice!view 两套固件。
 
 Sofle 分体键盘的 ZMK 固件配置，已接入 [DYA Studio](https://studio.dya.cormoran.works/)。
 
@@ -37,7 +37,7 @@ nice!view 版本通过 `sofle-no-display` snippet 关掉板载 SSD1306，避免�
 
 ### Studio 解锁状态
 
-本分支固件**默认处于 unlock（常开）状态**：`snippets/sofle-central/sofle-central.conf`
+本仓库固件**默认处于 unlock（常开）状态**：`snippets/sofle-central/sofle-central.conf`
 里设了 `CONFIG_ZMK_STUDIO_LOCKING=n`，断开连接后不会重新锁定，
 Web Bluetooth / WebUSB 可以直接连上键盘改键位。
 keymap 的 RAISE 层（左手第 1 枚拇指键）和 ADJUST 层（左手第 3 枚拇指键）
@@ -67,15 +67,15 @@ keymap 的 RAISE 层（左手第 1 枚拇指键）和 ADJUST 层（左手第 3 �
 
 | 层 | 进入方式 | 内容 |
 | --- | --- | --- |
-| 0 DEFAULT | — | 主键区，**与原 `main` 分支逐键一致**（仅右手第 2 枚拇指键有变，见下） |
+| 0 DEFAULT | — | 主键区，**与原基础键位配置逐键一致**（仅右手第 2 枚拇指键有变，见下） |
 | 1 LOWER | 左手第 4 枚拇指键 | F 键 / 数字 / 符号 |
 | 2 RAISE | 右手第 2 枚拇指键（短按退格 / 长按进层） | 蓝牙配置档 / 导航 / 编辑 |
 | 3 ADJUST | LOWER + RAISE 同按，或 RAISE 中 `&mo 3` | 媒体 / 亮度 / 蓝牙 / bootloader |
 
-> **相对原 `main` 分支的唯一改动**：DEFAULT 层右手第 2 枚拇指键由
+> **相对原基础键位配置的唯一改动**：DEFAULT 层右手第 2 枚拇指键由
 > `&kp RCTRL` 改为 `&lt 2 BACKSPACE`（短按退格 / 长按进 RAISE），
 > 以腾出分层入口并与 Corne 参考方案保持一致的习惯。其余 59 个键位逐键未动。
-> 原来的右 Ctrl 在本分支中未另置他处；若你依赖它，
+> 原来的右 Ctrl 在当前配置中未另置他处；若你依赖它，
 > 把该位改回 `&kp RCTRL` 即可（改回后 RAISE 层需另找入口）。
 
 拇指键布局（每侧 3 枚）：
@@ -102,7 +102,7 @@ LWR   ENT                          ALT   RGUI
 | 右编码器（sensor 1） | 翻页（`PG_UP` / `PG_DN`） |
 
 **编码器映射可以在 DYA Studio 网页上按层实时配置，无需重新编译固件。**
-本分支接入了 [cormoran/zmk-behavior-runtime-sensor-rotate](https://github.com/cormoran/zmk-behavior-runtime-sensor-rotate)，
+本仓库接入了 [cormoran/zmk-behavior-runtime-sensor-rotate](https://github.com/cormoran/zmk-behavior-runtime-sensor-rotate)，
 `keymap` 里为左右编码器各定义了一个行为实例：
 
 ```
@@ -113,7 +113,7 @@ rsr_right_pg   → sensor 1（右）  cw-binding = <&kp PG_UP>     ccw-binding =
 四层的 `sensor-bindings` 统一为 `<&rsr_left_vol &rsr_right_pg>`。行为规则：
 
 - **默认回落**：某层还没在网页上配置过时，按上面写的 `cw-binding` / `ccw-binding` 动作
-  （与原main 分支的 `&inc_dec_kp` 手感一致）
+  （与原 `&inc_dec_kp` 手感一致）
 - **网页优先**：在 DYA Studio 上配了某层后，该层以网页配置为准
 - **配置持久化**：绑定写入 settings，重启后保留
 - 两项都不写时该实例完全透明（不产生动作）
@@ -135,7 +135,7 @@ rsr_right_pg   → sensor 1（右）  cw-binding = <&kp PG_UP>     ccw-binding =
 
 ### 外设电源
 
-DEFAULT 层第 4 行保留了原 `main` 分支的 `&ext_power EP_TOG`（外设电源开关），
+DEFAULT 层第 4 行保留了原有的 `&ext_power EP_TOG`（外设电源开关），
 位置在第 3 行 MUTE 键右侧。Sofle 的 OLED / nice!view 与外设供电相关，
 若你的版本没有这个功能，删掉该绑定即可。
 
@@ -166,7 +166,7 @@ Firefox 与 Safari 不支持。
 
 ### Studio 锁定
 
-本分支默认 **Studio 常开（`CONFIG_ZMK_STUDIO_LOCKING=n`）**，不需要解锁即可连接。
+本仓库默认 **Studio 常开（`CONFIG_ZMK_STUDIO_LOCKING=n`）**，不需要解锁即可连接。
 如果删除该配置恢复默认的"断开即锁定"行为，则锁定状态下浏览器 Web Bluetooth
 扫不到键盘，需按解锁键：
 
@@ -184,7 +184,7 @@ Firefox 与 Safari 不支持。
 
 1. 将左手（central）通过 USB 数据线连接到电脑（需桌面版 Chrome / Edge）。
 2. 打开预载本仓库配置的在线测试页：
-   <https://tangbonze.github.io/zmk-keyboard-tester/?config=https://github.com/tangbonze/zmk-config-soflewireless>
+   <https://tangbonze.github.io/zmk-keyboard-tester/?config=https://github.com/tangbonze/zmk-config-sofle>
 3. 点击顶部 **「WebHID 物理矩阵」**，选择你的键盘即可直接点亮左右手任意物理轴体，并支持静默拦截模式防误触。
 
 > 该模块仅在左手（central）启用独立 Raw HID 接口（`HID_1`，`0xFF60 / 0x61`），
@@ -212,15 +212,15 @@ west zephyr-export
 # Studio 的 nanopb 生成器需要这两个包，否则构建会在生成 proto 时失败
 ./.venv/bin/pip install "protobuf>=5.27" grpcio-tools
 
-west zmk-build                   # 构建 build.yaml 里的全部变体
-west zmk-build -a sofle_right  # 只构建某一个
-west zmk-build -a sofle_left -p always   # 改过配置后必须 pristine 重建
+west zmk-build                              # 构建 build.yaml 里的全部变体（OLED + nice!view + settings_reset）
+west zmk-build -a sofle_right_oled          # 只构建某一个（nice!view 可用 sofle_left_niceview / sofle_right_niceview）
+west zmk-build -a sofle_left_oled -p always # 改过配置后必须 pristine 重建
 
 # 烧录必须指定单个变体（多目标时 --flash 会直接报错退出）
-west zmk-build -a sofle_left --flash
+west zmk-build -a sofle_left_oled --flash
 
 # 排查问题时编一个带 USB 日志的固件（会多占 flash，日常固件不受影响）
-west zmk-build -a sofle_left -S zmk-usb-logging --flash
+west zmk-build -a sofle_left_oled -S zmk-usb-logging --flash
 ```
 
 固件输出在 `./build/<artifact>/zephyr/zmk.uf2`。
@@ -231,12 +231,12 @@ west zmk-build -a sofle_left -S zmk-usb-logging --flash
 如果没被正确加载，固件照样能编过、刷进去也能打字，但 Studio 协议栈压根没被链接进去 ——
 表现就是"连不上 Studio"。
 
-**1. 先看构建日志里的 Kconfig warning —— 本分支应为 0 条。** 每条
+**1. 先看构建日志里的 Kconfig warning —— 应为 0 条。** 每条
 `assigned the value 'y' but got 'n'` 都意味着某个功能没开，warning 里带符号名：
 
 ```bash
 grep -iE "warning: (assigned|attempt to assign|choice symbol)" \
-  build/sofle_left/stdout_and_stderr.log
+  build/sofle_left_oled/stdout_and_stderr.log
 ```
 
 **2. 确认构建实际合并了哪些 `.conf`。** 这是定位"配置没生效"最快的办法——
@@ -244,7 +244,7 @@ grep -iE "warning: (assigned|attempt to assign|choice symbol)" \
 （ZMK 里的空文件）而不是本仓库的 snippet，就说明配置根本没被读到：
 
 ```bash
-grep -oE "[^ ']*\.conf" build/sofle_left/stdout_and_stderr.log | sort -u
+grep -oE "[^ ']*\.conf" build/sofle_left_oled/stdout_and_stderr.log | sort -u
 ```
 
 正确的输出里应该能看到 `snippets/sofle-central/sofle-central.conf`。
@@ -256,11 +256,12 @@ grep -oE "[^ ']*\.conf" build/sofle_left/stdout_and_stderr.log | sort -u
 
 ```bash
 grep -E "ZMK_STUDIO|PHYSICAL_LAYOUTS|FAST_KEYMAP|KSCAN_DIAG|WATCHDOG|OS_DETECTION|DEFAULT_LAYER|BLE_MANAGEMENT|RUNTIME_(MACRO|COMBO|INPUT)|INPUT_STREAM|DEVICE_INFO|LOCAL_ID_TYPE|ZMK_MATRIX_TESTER" \
-  build/sofle_left/zephyr/.config | grep -v "=n$"
+  build/sofle_left_oled/zephyr/.config | grep -v "=n$"
 ```
 
-**4. 编码器没反应**，确认 `grep EC11 build/sofle_left/zephyr/.config` 里
+**4. 编码器没反应**，确认 `grep EC11 build/sofle_left_oled/zephyr/.config` 里
 `CONFIG_EC11=y`，且 overlay 中对应 encoder 的 `status = "okay"`（已默认开启）。
+（排查 nice!view 固件时把路径中的 `sofle_left_oled` 换成 `sofle_left_niceview`。）
 
 **5. 抓设备日志。** 日常固件关了 `CONFIG_CONSOLE` 以省 flash，排查时用
 `-S zmk-usb-logging` 编一个带日志的版本。
@@ -290,7 +291,7 @@ snippets/
   sofle-oled/            OLED 显示
   sofle-no-display/      禁用板载 OLED，回收 flash
 zephyr/module.yml        告诉 west 在哪里找 boards / snippets
-build.yaml               构建矩阵
+build.yaml               构建矩阵（同时构建 OLED 与 nice!view 两套变体）
 ```
 
 > `sofle.dtsi` / `sofle_left.overlay` / `sofle_right.overlay` 以及物理布局
@@ -328,7 +329,7 @@ dependencies/zmk/app/boards/shields/sofle/sofle_left.conf   ← ZMK 里的空文
 
 ## 依赖来源
 
-本分支不使用 ZMK 官方 `main` / `v0.3`，而是 [cormoran/zmk](https://github.com/cormoran/zmk)
+本仓库不使用 ZMK 官方 `main` / `v0.3`，而是 [cormoran/zmk](https://github.com/cormoran/zmk)
 的 `main+dya` 分支 —— 它在 ZMK main 之上加了 DYA Studio 所需的
 自定义 Studio RPC 协议与分体中继支持。**DYA Studio 的扩展功能依赖这个 fork**，
 换回官方 ZMK 只能保留基础的 keymap 编辑功能。
@@ -336,8 +337,6 @@ dependencies/zmk/app/boards/shields/sofle/sofle_left.conf   ← ZMK 里的空文
 > ⚠️ cormoran 的 ZMK fork 为实验性分支，针对 DYA 键盘优化，可能包含不稳定的变更。
 > 自己用着没问题，但不建议用于需要高稳定性的场合。仓库配置了每周五一次的
 > 定时构建，用于监控上游变更带来的破坏。
->
-> 相比之下 `main` 分支用的是官方 ZMK `v0.2`，更保守稳定，但没有 DYA Studio。
 
 ## License
 

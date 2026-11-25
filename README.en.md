@@ -1,11 +1,12 @@
-# zmk-config-soflewireless
+# zmk-config-sofle
 
 **English** · [简体中文](./README.md)
 
-> This branch (`main`) = **onboard SSD1306 OLED / nice!view + DYA Studio**. It is built on
+> **Onboard SSD1306 OLED / nice!view + DYA Studio**. Built on
 > cormoran's ZMK `main+dya` fork with Zephyr 4.1; the EC11 encoder on each half
-> can be remapped per layer from DYA Studio. A single build outputs both OLED and
-> nice!view firmware variants.
+> can be remapped per layer from DYA Studio. The former `niceview` branch has
+> been merged into `main`, so a single build outputs both OLED and nice!view
+> firmware variants.
 
 ZMK firmware configuration for the Sofle split keyboard, with
 [DYA Studio](https://studio.dya.cormoran.works/) support.
@@ -42,7 +43,7 @@ the two display drivers do not conflict.
 
 ### Studio unlock state
 
-Firmware on this branch is **unlocked by default**:
+This firmware is **unlocked by default**:
 `snippets/sofle-central/sofle-central.conf` sets `CONFIG_ZMK_STUDIO_LOCKING=n`,
 so Studio stays unlocked after disconnecting and Web Bluetooth / WebUSB can
 connect without pressing a key. The `&studio_unlock` bindings on the RAISE
@@ -75,15 +76,15 @@ has `if SHIELD_SOFLE_LEFT → ZMK_SPLIT_ROLE_CENTRAL default y`).
 
 | Layer | How to enter | Contents |
 | --- | --- | --- |
-| 0 DEFAULT | — | Main key area, **identical key-for-key to the original `main` branch** (except the right 2nd thumb key — see below) |
+| 0 DEFAULT | — | Main key area, **identical key-for-key to the original base keymap** (except the right 2nd thumb key — see below) |
 | 1 LOWER | Left 4th thumb key | F keys / digits / symbols |
 | 2 RAISE | Right 2nd thumb key (tap = backspace / hold = enter layer) | Bluetooth profiles / navigation / editing |
 | 3 ADJUST | LOWER + RAISE together, or `&mo 3` from RAISE | Media / brightness / Bluetooth / bootloader |
 
-> **The only change from the original `main` branch**: the right 2nd thumb key on
+> **The only change from the original base keymap**: the right 2nd thumb key on
 > DEFAULT went from `&kp RCTRL` to `&lt 2 BACKSPACE` (tap backspace / hold RAISE),
 > freeing up a layer entry and matching Corne's convention. The other 59 keys are
-> untouched. Right Ctrl is not placed elsewhere in this branch; if you rely on it,
+> untouched. Right Ctrl is not placed elsewhere in this config; if you rely on it,
 > change that key back to `&kp RCTRL` (and find RAISE another entry point).
 
 Thumb cluster (3 keys per side):
@@ -111,7 +112,7 @@ One EC11 per half, mapped identically across all four layers:
 | Right encoder (sensor 1) | Paging (`PG_UP` / `PG_DN`) |
 
 **Encoder mappings can be reconfigured per layer from the DYA Studio web UI,
-without reflashing.** This branch integrates
+without reflashing.** This repository integrates
 [cormoran/zmk-behavior-runtime-sensor-rotate](https://github.com/cormoran/zmk-behavior-runtime-sensor-rotate)
 and defines one behavior instance per encoder in the keymap:
 
@@ -149,7 +150,7 @@ present but stop emitting events and the encoders go completely dead.
 
 ### External power
 
-The DEFAULT layer keeps the original `main` branch binding `&ext_power EP_TOG`
+The DEFAULT layer keeps the original `&ext_power EP_TOG` binding
 (external power toggle), on the 4th row just right of the MUTE key. Sofle's
 OLED / nice!view and peripherals are related to external power; if your build
 has no such feature, just delete that binding.
@@ -183,7 +184,7 @@ Firefox and Safari are not supported.
 
 ### Studio locking
 
-This branch keeps **Studio unlocked by default** (`CONFIG_ZMK_STUDIO_LOCKING=n`).
+This config keeps **Studio unlocked by default** (`CONFIG_ZMK_STUDIO_LOCKING=n`).
 If you remove that setting to restore the usual lock-on-disconnect behaviour,
 the browser's Web Bluetooth cannot see the keyboard while locked, so press an
 unlock key first:
@@ -203,7 +204,7 @@ module for hardware-level WebHID physical matrix testing with
 
 1. Connect the left half (central) to your computer via USB (desktop Chrome / Edge).
 2. Open the preloaded tester page for this repository:
-   <https://tangbonze.github.io/zmk-keyboard-tester/?config=https://github.com/tangbonze/zmk-config-soflewireless>
+   <https://tangbonze.github.io/zmk-keyboard-tester/?config=https://github.com/tangbonze/zmk-config-sofle>
 3. Click **WebHID Physical Matrix** at the top and select your keyboard to test every physical switch on both halves, with optional silent intercept mode.
 
 > The module is enabled on the left half (central) only via a dedicated Raw HID interface
@@ -232,15 +233,15 @@ west zephyr-export
 # Studio's nanopb generator needs these, or the build fails while generating protos
 ./.venv/bin/pip install "protobuf>=5.27" grpcio-tools
 
-west zmk-build                    # build every variant in build.yaml
-west zmk-build -a sofle_right    # build just one
-west zmk-build -a sofle_left -p always   # pristine rebuild after config edits
+west zmk-build                               # build every variant in build.yaml (OLED + nice!view + settings_reset)
+west zmk-build -a sofle_right_oled           # build just one (use sofle_left_niceview / sofle_right_niceview for nice!view)
+west zmk-build -a sofle_left_oled -p always  # pristine rebuild after config edits
 
 # flashing requires a single variant (--flash errors out with multiple targets)
-west zmk-build -a sofle_left --flash
+west zmk-build -a sofle_left_oled --flash
 
 # for debugging, build a firmware with USB logging (costs extra flash)
-west zmk-build -a sofle_left -S zmk-usb-logging --flash
+west zmk-build -a sofle_left_oled -S zmk-usb-logging --flash
 ```
 
 Firmware lands in `./build/<artifact>/zephyr/zmk.uf2`.
@@ -252,13 +253,13 @@ case: if none of the DYA Studio Kconfig is loaded, the firmware still builds,
 still types after flashing, but the Studio protocol stack was never linked in —
 symptom: "can't connect to Studio".
 
-**1. Check the Kconfig warnings in the build log — this branch should have none.**
+**1. Check the Kconfig warnings in the build log — there should be none.**
 Every `assigned the value 'y' but got 'n'` means some feature did not turn on;
 the warning names the symbol:
 
 ```bash
 grep -iE "warning: (assigned|attempt to assign|choice symbol)" \
-  build/sofle_left/stdout_and_stderr.log
+  build/sofle_left_oled/stdout_and_stderr.log
 ```
 
 **2. Confirm which `.conf` files were actually merged.** This is the fastest
@@ -267,7 +268,7 @@ way to find "the config never got read" — if you see
 ZMK) instead of this repo's snippet, the config was never picked up:
 
 ```bash
-grep -oE "[^ ']*\.conf" build/sofle_left/stdout_and_stderr.log | sort -u
+grep -oE "[^ ']*\.conf" build/sofle_left_oled/stdout_and_stderr.log | sort -u
 ```
 
 A correct run shows `snippets/sofle-central/sofle-central.conf`.
@@ -280,12 +281,13 @@ line up with the existing keys, showing up as "changes had no effect"):
 
 ```bash
 grep -E "ZMK_STUDIO|PHYSICAL_LAYOUTS|FAST_KEYMAP|KSCAN_DIAG|WATCHDOG|OS_DETECTION|DEFAULT_LAYER|BLE_MANAGEMENT|RUNTIME_(MACRO|COMBO|INPUT)|INPUT_STREAM|DEVICE_INFO|LOCAL_ID_TYPE|ZMK_MATRIX_TESTER" \
-  build/sofle_left/zephyr/.config | grep -v "=n$"
+  build/sofle_left_oled/zephyr/.config | grep -v "=n$"
 ```
 
-**4. Encoders do nothing** — confirm `grep EC11 build/sofle_left/zephyr/.config`
+**4. Encoders do nothing** — confirm `grep EC11 build/sofle_left_oled/zephyr/.config`
 shows `CONFIG_EC11=y`, and that the matching encoder in the overlay has
 `status = "okay"` (already the default).
+(For the nice!view build, replace `sofle_left_oled` with `sofle_left_niceview` in the paths above.)
 
 **5. Capture device logs.** Daily firmware disables `CONFIG_CONSOLE` to save
 flash; for debugging, build a logged variant with `-S zmk-usb-logging`.
@@ -320,7 +322,7 @@ snippets/
   sofle-oled/            OLED display
   sofle-no-display/      disables the onboard OLED, reclaims flash
 zephyr/module.yml        tells west where to find boards / snippets
-build.yaml               build matrix
+build.yaml               build matrix (builds both OLED and nice!view variants)
 ```
 
 > `sofle.dtsi`, `sofle_left.overlay`, `sofle_right.overlay` and the physical
@@ -362,7 +364,7 @@ board roots. So there are only two ways to isolate config per half:
 
 ## Dependency source
 
-This branch does not use ZMK official `main` / `v0.3` but the `main+dya` branch
+This configuration does not use ZMK official `main` / `v0.3` but the `main+dya` branch
 of [cormoran/zmk](https://github.com/cormoran/zmk) — ZMK main plus the custom
 Studio RPC protocol and split relay support DYA Studio needs. **DYA Studio's
 extended features depend on this fork**; reverting to official ZMK keeps only
@@ -372,9 +374,6 @@ the basic keymap editor.
 > may contain unstable changes. Fine for personal use, but not recommended where
 > high stability matters. The repo runs a weekly build to catch breakage from
 > upstream changes.
->
-> By contrast, the `main` branch uses official ZMK `v0.2` — more conservative
-> and stable, but without DYA Studio.
 
 ## License
 
