@@ -2,9 +2,9 @@
 
 [English](./README.en.md) · **简体中文**
 
-> 本分支（`main`）= **板载 SSD1306 OLED + DYA Studio**。使用 ZMK main + Zephyr 4.1
+> 本分支（`main`）= **板载 SSD1306 OLED / nice!view + DYA Studio**。使用 ZMK main + Zephyr 4.1
 > 的 cormoran fork（`main+dya`），每半一枚 EC11 编码器的映射可在 DYA Studio 里按层修改。
-> nice!view 版本请用 `niceview` 分支。
+> 一次构建同时输出板载 OLED 与 nice!view 两套固件。
 
 Sofle 分体键盘的 ZMK 固件配置，已接入 [DYA Studio](https://studio.dya.cormoran.works/)。
 
@@ -28,10 +28,12 @@ Actions → 最新一次构建 → Artifacts → `zmk-firmware`，内含以下 `
 
 | Artifact | 说明 |
 | --- | --- |
-| `sofle_left_oled` / `sofle_right_oled` | **板载 SSD1306 OLED**（本分支唯一固件变体） |
+| `sofle_left_oled` / `sofle_right_oled` | **板载 SSD1306 OLED** |
+| `sofle_left_niceview` / `sofle_right_niceview` | **nice!view 适配板** |
 | `settings_reset` | 清除所有持久化设置（含 DYA Studio 保存的配置） |
 
 左右半分别刷对应文件。`settings_reset` 刷完后再刷正常固件即可。
+nice!view 版本通过 `sofle-no-display` snippet 关掉板载 SSD1306，避免两套显示驱动冲突。
 
 ### Studio 解锁状态
 

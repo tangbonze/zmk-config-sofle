@@ -1,9 +1,9 @@
-# Sofle 固件构建矩阵 —— main 分支（板载 SSD1306 OLED + DYA Studio）
+# Sofle 固件构建矩阵（OLED / nice!view + DYA Studio）
 #
 # 由 `west zmk-build` 驱动（来自 cormoran/zmk-west-commands）。
 # 注意：artifact 字段名是 `artifact`，不是官方工作流的 `artifact-name`。
 #
-# 本分支只出 OLED 固件；nice!view 变体在 niceview 分支。
+# 一次构建同时输出板载 OLED 与 nice!view 两套固件变体（含 settings_reset）。
 #
 # 左手变体必须同时带 `sofle-central` 与 `studio-rpc-usb-uart` snippet：
 # 前者装载 DYA Studio 全部 Kconfig，后者提供 USB CDC-ACM 传输通道。
@@ -12,6 +12,9 @@
 # ⚠️ Sofle 每半各有一枚 EC11 编码器，overlay 里已 status = "okay"。
 #    CONFIG_EC11 在 config/sofle.conf 里两半共用，编码器事件经
 #    zmk-behavior-runtime-sensor-rotate（RSR）在 DYA Studio 里按层配置。
+#
+# sofle-no-display 用来关掉板载 SSD1306：sofle.dtsi 里
+# zephyr,display = &oled 是硬编码的，不加它 SSD1306 驱动仍会编进固件。
 #
 # Studio 解锁状态：左手的 sofle-central snippet 里设了
 # CONFIG_ZMK_STUDIO_LOCKING=n —— 固件默认处于 unlock（常开）状态，
@@ -28,6 +31,16 @@ include:
     shield: sofle_right
     snippets: [sofle-oled, sofle-peripheral]
     artifact: sofle_right_oled
+
+  # ================= nice!view =================
+  - board: nice_nano//zmk
+    shield: sofle_left nice_view_adapter nice_view
+    snippets: [sofle-no-display, sofle-central, studio-rpc-usb-uart]
+    artifact: sofle_left_niceview
+  - board: nice_nano//zmk
+    shield: sofle_right nice_view_adapter nice_view
+    snippets: [sofle-no-display, sofle-peripheral]
+    artifact: sofle_right_niceview
 
   # ================= 设置重置固件 =================
   # 刷这个可以把 DYA Studio 里改坏的设置恢复默认

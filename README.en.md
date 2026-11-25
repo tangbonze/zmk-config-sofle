@@ -2,10 +2,10 @@
 
 **English** · [简体中文](./README.md)
 
-> This branch (`main`) = **onboard SSD1306 OLED + DYA Studio**. It is built on
+> This branch (`main`) = **onboard SSD1306 OLED / nice!view + DYA Studio**. It is built on
 > cormoran's ZMK `main+dya` fork with Zephyr 4.1; the EC11 encoder on each half
-> can be remapped per layer from DYA Studio. For nice!view use the `niceview`
-> branch.
+> can be remapped per layer from DYA Studio. A single build outputs both OLED and
+> nice!view firmware variants.
 
 ZMK firmware configuration for the Sofle split keyboard, with
 [DYA Studio](https://studio.dya.cormoran.works/) support.
@@ -32,11 +32,13 @@ Actions → latest build → Artifacts → `zmk-firmware` contains these `.uf2` 
 
 | Artifact | Description |
 | --- | --- |
-| `sofle_left_oled` / `sofle_right_oled` | **Onboard SSD1306 OLED** (the only variant on this branch) |
+| `sofle_left_oled` / `sofle_right_oled` | **Onboard SSD1306 OLED** |
+| `sofle_left_niceview` / `sofle_right_niceview` | **nice!view adapter** |
 | `settings_reset` | Clear all persistent settings (including those saved by DYA Studio) |
 
 Flash the matching file to each half. After `settings_reset`, flash a normal
-firmware again.
+firmware again. The `sofle-no-display` snippet disables the onboard SSD1306 so
+the two display drivers do not conflict.
 
 ### Studio unlock state
 
