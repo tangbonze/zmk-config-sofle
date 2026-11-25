@@ -192,6 +192,21 @@ Unlock:     left 1st thumb key on RAISE (GUI position)
 Backup:     left 3rd thumb key on ADJUST
 ```
 
+## ZMK KeyTester (Physical Matrix Tester)
+
+This repo integrates the [tangbonze/zmk-matrix-tester](https://github.com/tangbonze/zmk-matrix-tester)
+module for hardware-level WebHID physical matrix testing with
+[ZMK KeyTester](https://github.com/tangbonze/zmk-keyboard-tester)
+(without enabling `CONFIG_ZMK_USB_LOGGING=y`).
+
+1. Connect the left half (central) to your computer via USB (desktop Chrome / Edge).
+2. Open the preloaded tester page for this repository:
+   <https://tangbonze.github.io/zmk-keyboard-tester/?config=https://github.com/tangbonze/zmk-config-soflewireless>
+3. Click **WebHID Physical Matrix** at the top and select your keyboard to test every physical switch on both halves, with optional silent intercept mode.
+
+> The module is enabled on the left half (central) only via a dedicated Raw HID interface
+> (`HID_1`, `0xFF60 / 0x61`), leaving normal keyboard HID and BLE untouched with zero battery impact when unplugged.
+
 ## Local build
 
 You need the [Zephyr SDK](https://docs.zephyrproject.org/latest/develop/toolchains/index.html)
@@ -262,7 +277,7 @@ client — otherwise bindings written by Macros / Combos / Keymap Editor don't
 line up with the existing keys, showing up as "changes had no effect"):
 
 ```bash
-grep -E "ZMK_STUDIO|PHYSICAL_LAYOUTS|FAST_KEYMAP|KSCAN_DIAG|WATCHDOG|OS_DETECTION|DEFAULT_LAYER|BLE_MANAGEMENT|RUNTIME_(MACRO|COMBO|INPUT)|INPUT_STREAM|DEVICE_INFO|LOCAL_ID_TYPE" \
+grep -E "ZMK_STUDIO|PHYSICAL_LAYOUTS|FAST_KEYMAP|KSCAN_DIAG|WATCHDOG|OS_DETECTION|DEFAULT_LAYER|BLE_MANAGEMENT|RUNTIME_(MACRO|COMBO|INPUT)|INPUT_STREAM|DEVICE_INFO|LOCAL_ID_TYPE|ZMK_MATRIX_TESTER" \
   build/sofle_left/zephyr/.config | grep -v "=n$"
 ```
 
@@ -287,7 +302,7 @@ config/
                           fork, not this file)
   sofle.conf             Kconfig shared by both halves (Bluetooth, battery,
                          sleep, EC11 encoders, …)
-  west-dependency.yml    dependency manifest: ZMK fork + DYA Studio module stack
+  west-dependency.yml    dependency manifest: ZMK fork + DYA Studio module stack + zmk-matrix-tester
   west.yml               default west entry point
   west-isolated.yml      dependencies into ./dependencies
   west-workspace.yml     dependencies into the west topdir
