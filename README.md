@@ -175,6 +175,20 @@ Firefox 与 Safari 不支持。
 备用解锁位：ADJUST 层上的左手第 3 枚拇指键
 ```
 
+## ZMK KeyTester（物理矩阵测试）
+
+本仓库已集成 [tangbonze/zmk-matrix-tester](https://github.com/tangbonze/zmk-matrix-tester)
+固件模块，配合 [ZMK KeyTester](https://github.com/tangbonze/zmk-keyboard-tester)
+网页端可进行硬件级物理矩阵直读测试（无需开启 `CONFIG_ZMK_USB_LOGGING=y`）。
+
+1. 将左手（central）通过 USB 数据线连接到电脑（需桌面版 Chrome / Edge）。
+2. 打开预载本仓库配置的在线测试页：
+   <https://tangbonze.github.io/zmk-keyboard-tester/?config=https://github.com/tangbonze/zmk-config-soflewireless>
+3. 点击顶部 **「WebHID 物理矩阵」**，选择你的键盘即可直接点亮左右手任意物理轴体，并支持静默拦截模式防误触。
+
+> 该模块仅在左手（central）启用独立 Raw HID 接口（`HID_1`，`0xFF60 / 0x61`），
+> 不干扰标准键盘输出与蓝牙；拔掉 USB 使用电池时零代码执行、不影响深度休眠。
+
 ## 本地构建
 
 需要 [Zephyr SDK](https://docs.zephyrproject.org/latest/develop/toolchains/index.html) 和
@@ -240,7 +254,7 @@ grep -oE "[^ ']*\.conf" build/sofle_left/stdout_and_stderr.log | sort -u
 绑定对不上现有按键，表现为「改了没反应」）：
 
 ```bash
-grep -E "ZMK_STUDIO|PHYSICAL_LAYOUTS|FAST_KEYMAP|KSCAN_DIAG|WATCHDOG|OS_DETECTION|DEFAULT_LAYER|BLE_MANAGEMENT|RUNTIME_(MACRO|COMBO|INPUT)|INPUT_STREAM|DEVICE_INFO|LOCAL_ID_TYPE" \
+grep -E "ZMK_STUDIO|PHYSICAL_LAYOUTS|FAST_KEYMAP|KSCAN_DIAG|WATCHDOG|OS_DETECTION|DEFAULT_LAYER|BLE_MANAGEMENT|RUNTIME_(MACRO|COMBO|INPUT)|INPUT_STREAM|DEVICE_INFO|LOCAL_ID_TYPE|ZMK_MATRIX_TESTER" \
   build/sofle_left/zephyr/.config | grep -v "=n$"
 ```
 
@@ -261,7 +275,7 @@ config/
                          （不参与编译；DYA Studio 的键盘图形来自 ZMK fork 内置的
                           physical-layout，不是这个文件）
   sofle.conf             两半共用的 Kconfig（蓝牙、电池、sleep、EC11 编码器……）
-  west-dependency.yml    依赖清单：ZMK fork + DYA Studio 模块栈
+  west-dependency.yml    依赖清单：ZMK fork + DYA Studio 模块栈 + zmk-matrix-tester
   west.yml               默认 west 入口
   west-isolated.yml      依赖装到 ./dependencies
   west-workspace.yml     依赖装到 west topdir
