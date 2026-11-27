@@ -23,10 +23,20 @@
 #define CMD_EMPTY 0x0D
 #define CMD_SEARCH 0x04
 #define CMD_READSYSPARA 0x0F
+#define CMD_VFY_PWD 0x13
 #define CMD_TEMPLATENUM 0x1D
 #define CMD_READINDEXTABLE 0x1F
 #define CMD_AURALEDCONFIG 0x35
 #define CMD_CHECKSENSOR 0x36
+#define CMD_CONTROL_BLN 0x3C
+
+/* HLK-ZW series PS_ControlBLN (0x3C) color bitmask (B=bit0, G=bit1, R=bit2) */
+#define ZW_LED_NONE 0x00
+#define ZW_LED_BLUE 0x01
+#define ZW_LED_GREEN 0x02
+#define ZW_LED_CYAN 0x03
+#define ZW_LED_RED 0x04
+#define ZW_LED_PURPLE 0x05
 
 /* LED Styles — R502-A AURA_LED_CONFIG CtrlCode values (must match datasheet) */
 #define LED_BREATHING 0x01

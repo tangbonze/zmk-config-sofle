@@ -13,6 +13,8 @@ static const struct device *uart_dev;
 static uint8_t rx_buf[512];
 static uint16_t rx_idx = 0;
 static bool sensor_ready;
+static bool sensor_is_hlk_zw;
+static uint16_t sensor_lib_size = 200;
 static uint16_t last_match_score;
 
 /* Mutex protecting all sensor UART (uart0) access.
@@ -128,7 +130,9 @@ static int generate_char(uint8_t slot) {
 }
 
 static int search_finger(uint16_t *match_id, uint16_t *score) {
-  uint8_t cmd[] = {CMD_SEARCH, 0x01, 0x00, 0x00, 0x00, 0xC8};
+  uint16_t count = sensor_lib_size > 0 ? sensor_lib_size : 200;
+  uint8_t cmd[] = {CMD_SEARCH, 0x01, 0x00, 0x00,
+                   (uint8_t)(count >> 8), (uint8_t)(count & 0xFF)};
   send_packet(FP_CMD_PACKET, cmd, 6);
   if (receive_packet(2000) < 0)
     return -ETIMEDOUT;
@@ -241,12 +245,44 @@ int touchpass_delete_template(uint16_t id, uint16_t count) {
   return rc;
 }
 
+static uint8_t map_color_to_zw_bln(uint8_t color) {
+  switch (color) {
+  case FP_LED_RED:
+    return ZW_LED_RED;
+  case FP_LED_BLUE:
+    return ZW_LED_BLUE;
+  case FP_LED_PURPLE:
+    return ZW_LED_PURPLE;
+  case FP_LED_GREEN:
+    return ZW_LED_GREEN;
+  case FP_LED_CYAN:
+    return ZW_LED_CYAN;
+  default:
+    return ZW_LED_BLUE;
+  }
+}
+
 int touchpass_set_led(uint8_t ctrl, uint8_t speed, uint8_t color,
                       uint8_t times) {
   if (!uart_dev)
     return -ENODEV;
   k_mutex_lock(&sensor_mutex, K_FOREVER);
-  uint8_t cmd[] = {CMD_AURALEDCONFIG, ctrl, speed, color, times};
+  uint8_t cmd[5];
+  if (sensor_is_hlk_zw) {
+    uint8_t zw_color = (ctrl == LED_OFF) ? ZW_LED_NONE : map_color_to_zw_bln(color);
+    uint8_t zw_cycles = (ctrl == LED_OFF) ? 0 : times;
+    cmd[0] = CMD_CONTROL_BLN;
+    cmd[1] = ctrl;
+    cmd[2] = zw_color;
+    cmd[3] = zw_color;
+    cmd[4] = zw_cycles;
+  } else {
+    cmd[0] = CMD_AURALEDCONFIG;
+    cmd[1] = ctrl;
+    cmd[2] = speed;
+    cmd[3] = color;
+    cmd[4] = times;
+  }
   send_packet(FP_CMD_PACKET, cmd, 5);
   int rc;
   if (receive_packet(1000) < 0) {
@@ -698,24 +734,55 @@ int touchpass_check_sensor(void) {
     return -ENODEV;
   k_mutex_lock(&sensor_mutex, K_FOREVER);
 
-  /* Try CMD_HANDSHAKE first (standard) */
+  sensor_ready = false;
+  sensor_is_hlk_zw = false;
+
+  /* 1) Try R502-A CMD_HANDSHAKE (0x40) */
   uint8_t cmd_hs[] = {CMD_HANDSHAKE};
   send_packet(FP_CMD_PACKET, cmd_hs, 1);
-  sensor_ready = (receive_packet(1000) >= 0 && rx_buf[9] == 0x00);
+  if (receive_packet(1000) >= 0 && rx_buf[9] == 0x00) {
+    sensor_ready = true;
+  }
 
-  /* Fall back to CMD_CHECKSENSOR for R502-A firmware variants that do not
-   * respond to CMD_HANDSHAKE, matching nrf52 reference firmware behaviour. */
+  /* 2) Fall back to R502-A CMD_CHECKSENSOR (0x36) */
   if (!sensor_ready) {
     uint8_t cmd_cs[] = {CMD_CHECKSENSOR};
     send_packet(FP_CMD_PACKET, cmd_cs, 1);
-    sensor_ready = (receive_packet(1000) >= 0 && rx_buf[9] == 0x00);
+    if (receive_packet(1000) >= 0 && rx_buf[9] == 0x00) {
+      sensor_ready = true;
+    }
+  }
+
+  /* 3) Fall back to HLK-ZW0906 / EF01 standard PS_VfyPwd (0x13, default 0x00000000) */
+  if (!sensor_ready) {
+    uint8_t cmd_pwd[] = {CMD_VFY_PWD, 0x00, 0x00, 0x00, 0x00};
+    send_packet(FP_CMD_PACKET, cmd_pwd, 5);
+    if (receive_packet(1000) >= 0 && rx_buf[9] == 0x00) {
+      sensor_ready = true;
+      sensor_is_hlk_zw = true;
+    }
+  }
+
+  /* 4) Final fallback & capacity probe via CMD_READSYSPARA (0x0F) */
+  uint8_t cmd_sys[] = {CMD_READSYSPARA};
+  send_packet(FP_CMD_PACKET, cmd_sys, 1);
+  if (receive_packet(1000) >= 0 && rx_buf[9] == 0x00) {
+    uint16_t lib_size = (rx_buf[14] << 8) | rx_buf[15];
+    if (lib_size > 0) {
+      sensor_lib_size = lib_size;
+    }
+    if (!sensor_ready) {
+      sensor_ready = true;
+      sensor_is_hlk_zw = true;
+    }
   }
 
   k_mutex_unlock(&sensor_mutex);
   if (sensor_ready) {
-    LOG_INF("R502-A sensor connected");
+    LOG_INF("Fingerprint sensor connected (%s, capacity=%u)",
+            sensor_is_hlk_zw ? "HLK-ZW" : "R502-A", sensor_lib_size);
   } else {
-    LOG_WRN("R502-A sensor not responding");
+    LOG_WRN("Fingerprint sensor not responding");
   }
   return sensor_ready ? 0 : -EIO;
 }
