@@ -1,0 +1,4 @@
+name: sofle-fingerprint
+append:
+  EXTRA_DTC_OVERLAY_FILE: sofle-fingerprint.overlay
+  EXTRA_CONF_FILE: sofle-fingerprint.conf

@@ -25,7 +25,7 @@ include:
   # ================= OLED（SSD1306 128x32）=================
   - board: nice_nano//zmk
     shield: sofle_left
-    snippets: [sofle-oled, sofle-central, studio-rpc-usb-uart]
+    snippets: [sofle-oled, sofle-central, studio-rpc-usb-uart, sofle-fingerprint]
     artifact: sofle_left_oled
   - board: nice_nano//zmk
     shield: sofle_right
@@ -35,7 +35,7 @@ include:
   # ================= nice!view =================
   - board: nice_nano//zmk
     shield: sofle_left nice_view_adapter nice_view
-    snippets: [sofle-no-display, sofle-central, studio-rpc-usb-uart]
+    snippets: [sofle-no-display, sofle-central, studio-rpc-usb-uart, sofle-fingerprint]
     artifact: sofle_left_niceview
   - board: nice_nano//zmk
     shield: sofle_right nice_view_adapter nice_view

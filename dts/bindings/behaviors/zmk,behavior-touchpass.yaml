@@ -1,0 +1,5 @@
+description: TouchPass Fingerprint Behavior
+
+compatible: "zmk,behavior-touchpass"
+
+include: zero_param.yaml

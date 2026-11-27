@@ -1,0 +1,44 @@
+# TouchPass Fingerprint Module Configuration (adapted from razilyis/zmk-module-Fingerprint)
+
+menuconfig ZMK_TOUCHPASS
+    bool "TouchPass Fingerprint Module"
+    depends on SERIAL
+    help
+      Enable TouchPass Fingerprint authentication and password storage.
+
+if ZMK_TOUCHPASS
+
+config ZMK_TOUCHPASS_ALWAYS_ON
+    bool "Always-on (Polling) Mode"
+    default n
+    help
+      If enabled, the sensor will constantly poll for fingerprints.
+      WARNING: This will significantly increase battery consumption.
+
+config ZMK_TOUCHPASS_SERIAL_RPC
+    bool "Enable Serial RPC (for config.html)"
+    default n
+    depends on USB_CDC_ACM && !ZMK_USB_LOGGING
+    help
+      Enable JSON-RPC communication over USB Serial for the web configuration tool.
+      Cannot be used simultaneously with ZMK_USB_LOGGING: both use the same
+      CDC ACM UART. To debug with USB logging, set this option to n.
+
+config ZMK_TOUCHPASS_ENROLL_TIMEOUT_S
+    int "Enrollment timeout in seconds"
+    default 60
+    range 10 300
+    help
+      Maximum time (seconds) allowed for the full 6-step enrollment sequence.
+      Increase if you need more time to place your finger repeatedly.
+
+config ZMK_TOUCHPASS_POLL_INTERVAL_MS
+    int "Always-on polling interval in milliseconds"
+    default 80
+    range 50 500
+    depends on ZMK_TOUCHPASS_ALWAYS_ON
+    help
+      How often (milliseconds) the sensor is polled for a finger in always-on
+      mode. Lower values improve response time but increase battery drain.
+
+endif # ZMK_TOUCHPASS
